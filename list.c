@@ -5,7 +5,7 @@
  
 #include "list.h"
 
-sList allocList(long size) {
+sList allocList(long size, int (*cmp)(const void *, const void *)) {
 	//aloca a lista
 	sList l = malloc(sizeof(struct sLista));
 	if (!l)
@@ -16,6 +16,7 @@ sList allocList(long size) {
 	//seta valores da lista
 	l->qtd = 0;
 	l->size = size;
+	l->cmp = cmp;
 	//encadeia o sentinela
 	l->sentinela->ant = l->sentinela->prox = l->sentinela;
 	//retorna o endereço da lista
@@ -108,6 +109,29 @@ void* frontList(sList l) {
 	if (!l || emptyList(l))
 		return NULL;
 	return l->sentinela->prox->elem;
+}
+
+void* searchlist(sList l, void *key, sIterator i) {
+	if (!l || !key)
+		return NULL;
+	sIterator it;
+	//percorre toda a lista
+	for (it = createIt(l); !endLoop(it); nextIt(it)) {
+		//se encontrou o node com a chave passada
+		if (!l->cmp(key, returnIt(it))) {
+			//se i existe aponta ele para o node com a chave passada
+			if (i) {
+				i->node = it->node;
+				i->inicio = NULL;
+			}
+			//libera o iterador criado no inicio do loop
+			freeIt(it);
+			return returnIt(it);
+		}
+	}
+	//libera o iterador criado no inicio do loop
+	freeIt(it);
+	return NULL;
 }
 
 int emptyList(sList l) {

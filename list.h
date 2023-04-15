@@ -18,6 +18,7 @@ typedef struct sLista {
 	long qtd;
 	size_t size;
 	struct sNode *sentinela;
+	int (*cmp)(const void *key, const void *elem);
 } *sList;
 
 typedef struct sIterador {
@@ -34,11 +35,11 @@ typedef struct sIterador {
  * @return uma lista vazia
  * 
  * Exemplo da criação de uma lista que guarda itens do tipo double:
- * sList l = createList(double);
+ * sList l = createList(double, cmpDouble);
  * */
-#define createList(type) allocList(sizeof(type))
+#define createList(type) allocList(sizeof(type), int (*cmp)(const void *, const void *))
 
-sList allocList(long size);
+sList allocList(long size, int (*cmp)(const void *, const void *));
 
 /* Insere um elemento no fim da lista
  * Deve ser passado como primeiro argumento o endereço da lista usada, e segundo argumento o endereço do elemento que será guardado
@@ -81,6 +82,8 @@ void* backList(sList l);
  * Ex:	double *d = (double*) frontList(&l);
  * */
 void* frontList(sList l);
+
+void* searchlist(sList l, void *key, sIterator i);
 
 /* Informa se a lista está vazia
  * Deve ser passado como argumento o endereço da lista usada
