@@ -22,8 +22,9 @@ typedef struct sLista {
 
 typedef struct sIterador {
 	struct sNode *node;
-	struct sList *lista;
-	int loop;
+	struct sLista *lista;
+	struct sNode *inicio;
+	long vistos;
 } *sIterator;
 
 /**
@@ -33,7 +34,7 @@ typedef struct sIterador {
  * @return uma lista vazia
  * 
  * Exemplo da criação de uma lista que guarda itens do tipo double:
- * 	sList l = createList(double);
+ * sList l = createList(double);
  * */
 #define createList(type) allocList(sizeof(type))
 
@@ -104,7 +105,7 @@ void freeList(sList l);
 
 
 /* 
- * Protótipo das funçõees do Iterador
+ * Protótipo das funções do Iterador
  * 
  * */
 
@@ -148,14 +149,14 @@ void nextIt(sIterator i);
  * Não tem retorno
  * Ex:	insereAntIt(&i, &e);
  * */
-void pushBeforeIt(sIterator i, void *e);
+int pushBeforeIt(sIterator i, void *e);
 
 /* Insere um elemento na lista depois da posição atual do iterador
  * Deve ser passado como primeiro argumento o endereço do iterador usado, e segundo argumento o endereço do elemento que será guardado
  * Não tem retorno
  * Ex:	insereProxIt(&i, &e);
  * */
-void pushNextIt(sIterator i, void *e);
+int pushNextIt(sIterator i, void *e);
 
 /* Remove o elemento da lista que está sendo referenciado pelo iterador
  * Deve ser passado como argumento o endereço do iterador usado (o iterador passa a apontar para o elemento seguinte)
@@ -185,7 +186,11 @@ int popNextIt(sIterator i);
  * */
 void* returnIt(sIterator i);
 
+void startLoop(sIterator i);
+
 int endLoop(sIterator i);
+
+void freeIt(sIterator i);
 
 #if 0
 	/* Informa se o iterador está referenciando para o início da lista
