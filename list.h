@@ -1,11 +1,12 @@
 /*
- * Lista duplamente encadeada com iterador
+ * Lista duplamente encadeada com sentinela e iterador
  * 
  * */
 
 #ifndef LIST_H
 #define LIST_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -37,7 +38,7 @@ typedef struct sIterador {
  * Exemplo da criação de uma lista que guarda itens do tipo double:
  * sList l = createList(double, cmpDouble);
  * */
-#define createList(type) allocList(sizeof(type), int (*cmp)(const void *, const void *))
+#define createList(type, cmp) allocList(sizeof(type), cmp)
 
 sList allocList(long size, int (*cmp)(const void *, const void *));
 

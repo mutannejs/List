@@ -1,5 +1,5 @@
 /*
- * Lista duplamente encadeada com iterador
+ * Lista duplamente encadeada com sentinela e iterador
  * 
  * */
  
@@ -115,6 +115,7 @@ void* searchlist(sList l, void *key, sIterator i) {
 	if (!l || !key)
 		return NULL;
 	sIterator it;
+	void *r;
 	//percorre toda a lista
 	for (it = createIt(l); !endLoop(it); nextIt(it)) {
 		//se encontrou o node com a chave passada
@@ -125,8 +126,9 @@ void* searchlist(sList l, void *key, sIterator i) {
 				i->inicio = NULL;
 			}
 			//libera o iterador criado no inicio do loop
+			r = returnIt(it);
 			freeIt(it);
-			return returnIt(it);
+			return r;
 		}
 	}
 	//libera o iterador criado no inicio do loop
