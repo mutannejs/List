@@ -123,7 +123,7 @@ void* searchlist(sList l, void *key, sIterator i) {
 			//se i existe aponta ele para o node com a chave passada
 			if (i) {
 				i->node = it->node;
-				i->inicio = NULL;
+				i->inicioLoop = NULL;
 			}
 			//libera o iterador criado no inicio do loop
 			r = returnIt(it);
@@ -182,7 +182,7 @@ sIterator createIt(sList l) {
 		i->node = l->sentinela->prox;
 	i->lista = l;
 	//inicia o loop
-	i->inicio = NULL;
+	i->inicioLoop = NULL;
 	startLoop(i);
 	return i;
 }
@@ -218,7 +218,7 @@ void beforeIt(sIterator i) {
 		i->node = i->node->ant->ant;
 	else
 		i->node = i->node->ant;
-	i->vistos -= 1;
+	i->vistosLoop -= 1;
 }
 
 void nextIt(sIterator i) {
@@ -230,7 +230,7 @@ void nextIt(sIterator i) {
 		i->node = i->node->prox->prox;
 	else
 		i->node = i->node->prox;
-	i->vistos += 1;
+	i->vistosLoop += 1;
 }
 
 int pushBeforeIt(sIterator i, void *e) {
@@ -256,8 +256,8 @@ int pushBeforeIt(sIterator i, void *e) {
 		frontIt(i);
 	}
 	
-	if (i->vistos > 0)
-		i->vistos += 1;
+	if (i->vistosLoop > 0)
+		i->vistosLoop += 1;
 
 	return 0;
 }
@@ -285,8 +285,8 @@ int pushNextIt(sIterator i, void *e) {
 		frontIt(i);
 	}
 	
-	if (i->vistos < 0)
-		i->vistos -= 1;
+	if (i->vistosLoop < 0)
+		i->vistosLoop -= 1;
 
 	return 0;
 }
@@ -308,8 +308,8 @@ int popIt(sIterator i) {
 	if (i->lista->qtd == 0)
 		i->node = NULL;
 
-	if (i->vistos < 0)
-		i->vistos += 1;
+	if (i->vistosLoop < 0)
+		i->vistosLoop += 1;
 
 	return 0;
 }
@@ -338,8 +338,8 @@ int popBeforeIt(sIterator i) {
 	if (i->lista->qtd == 0)
 		i->node = NULL;
 
-	if (i->vistos > 0)
-		i->vistos -= 1;
+	if (i->vistosLoop > 0)
+		i->vistosLoop -= 1;
 
 	return 0;
 }
@@ -368,8 +368,104 @@ int popNextIt(sIterator i) {
 	if (i->lista->qtd == 0)
 		i->node = NULL;
 
-	if (i->vistos < 0)
-		i->vistos += 1;
+	if (i->vistosLoop < 0)
+		i->vistosLoop += 1;
+
+	return 0;
+}
+
+int pushBackIt(sIterator i, void *e) {
+	if (!i || !e)
+		return 1;
+
+	//aloca um node
+	sNode *no = (sNode*) malloc(sizeof(sNode));
+	if (!no)
+		return 1;
+	no->elem = malloc(i->lista->size);
+	if (!no->elem)
+		return 1;
+
+	//seta os valores do node
+	memcpy(no->elem, e, i->lista->size);
+	no->ant = i->lista->sentinela->ant;
+	no->prox = i->lista->sentinela;
+
+	//atualiza a lista
+	i->lista->sentinela->ant->prox = no;
+	i->lista->sentinela->ant = no;
+	i->lista->qtd++;
+
+	//atualiza os valores do loop
+	if (i->inicioLoop && i->vistosLoop > 0) {
+		sIterator it = createIt(i->lista);
+		backIt(it);
+		for (long j = i->vistosLoop; j > 0; j--, beforeIt(it)) {
+			if (it->node == i->inicioLoop) {
+				i->vistosLoop += 1;
+				j = 0;
+			}
+		}
+		freeIt(it);
+	}
+	else if (i->inicioLoop && i->vistosLoop < 0) {
+		sIterator it = createIt(i->lista);
+		backIt(it);
+		for (long j = i->vistosLoop; j < 0; j++, nextIt(it)) {
+			if (it->node == i->inicioLoop) {
+				i->vistosLoop -= 1;
+				j = 0;
+			}
+		}
+		freeIt(it);
+	}
+
+	return 0;
+}
+
+int pushFrontIt(sIterator i, void *e) {
+	if (!i || !e)
+		return 1;
+
+	//aloca um node
+	sNode *no = (sNode*) malloc(sizeof(sNode));
+	if (!no)
+		return 1;
+	no->elem = malloc(i->lista->size);
+	if (!no->elem)
+		return 1;
+
+	//seta os valores do node
+	memcpy(no->elem, e, i->lista->size);
+	no->ant = i->lista->sentinela;
+	no->prox = i->lista->sentinela->prox;
+
+	//atualiza a lista
+	i->lista->sentinela->prox->ant = no;
+	i->lista->sentinela->prox = no;
+	i->lista->qtd++;
+
+	//atualiza os valores do loop
+	if (i->inicioLoop && i->vistosLoop > 0) {
+		sIterator it = createIt(i->lista);
+		for (long j = i->vistosLoop; j > 0; j--, beforeIt(it)) {
+			if (it->node == i->inicioLoop) {
+				i->vistosLoop += 1;
+				j = 0;
+			}
+		}
+		freeIt(it);
+	}
+	else if (i->inicioLoop && i->vistosLoop < 0) {
+		sIterator it = createIt(i->lista);
+		for (long j = i->vistosLoop; j < 0; j++, nextIt(it)) {
+			if (it->node == i->inicioLoop) {
+				i->vistosLoop -= 1;
+				j = 0;
+			}
+		}
+		freeIt(it);
+	}
 
 	return 0;
 }
@@ -384,8 +480,8 @@ void* returnIt(sIterator i) {
 void startLoop(sIterator i) {
 	if (!i || emptyList(i->lista))
 		return;
-	i->inicio = i->node;
-	i->vistos = 0;
+	i->inicioLoop = i->node;
+	i->vistosLoop = 0;
 }
 
 int endLoop(sIterator i) {
@@ -394,8 +490,8 @@ int endLoop(sIterator i) {
 		return 1;
 	//se a lista está vazia ou foi percorrido toda a lista desde startLoop,
 	//seta i->inicio como NULL e retorna fim de loop
-	else if (emptyList(i->lista) || (i->node == i->inicio && i->vistos != 0)) {
-		i->inicio = NULL;
+	else if (emptyList(i->lista) || (i->node == i->inicioLoop && i->vistosLoop != 0)) {
+		i->inicioLoop = NULL;
 		return 1;
 	}
 	else {

@@ -25,8 +25,8 @@ typedef struct sLista {
 typedef struct sIterador {
 	struct sNode *node;
 	struct sLista *lista;
-	struct sNode *inicio;
-	long vistos;
+	struct sNode *inicioLoop;
+	long vistosLoop;
 } *sIterator;
 
 /**
@@ -176,6 +176,10 @@ int pushBeforeIt(sIterator i, void *e);
  * Ex:	insereProxIt(&i, &e);
  * */
 int pushNextIt(sIterator i, void *e);
+
+int pushBackIt(sIterator i, void *e);
+
+int pushFrontIt(sIterator i, void *e);
 
 /* Remove o elemento da lista que está sendo referenciado pelo iterador
  * Deve ser passado como argumento o endereço do iterador usado (o iterador passa a apontar para o elemento seguinte)
