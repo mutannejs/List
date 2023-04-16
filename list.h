@@ -31,21 +31,36 @@ typedef struct sIterador {
 
 /**
  * Cria uma lista
+ * Uma lista é originalmente vazia
  * 
- * @param type deve ser o tipo do dado que será guardado na lista
- * @return uma lista vazia
+ * type	: deve ser o tipo dos dados que serão inseridos na lista
+ * cmp	: função de comparação entre dados do mesmo tipo passado como argumento.
+ * 			  A função deve ter a assinatura seguindo o padrão
+ * 			  int (*cmp)(const void *, const void *), deve retornar -1 se o primeiro
+ * 			  argumento é menor que o segundo, 0 se é igual e 1 se é maior
+ * 			  Exemplo de assinatura: int cmpString(const void *str1, const void *str2)
+ * retorno	: uma variável do tipo sList
  * 
- * Exemplo da criação de uma lista que guarda itens do tipo double:
+ * Exemplo da criação de uma lista que guarda itens do tipo double, com a
+ * 	função de comparação chamada cmpDouble:
  * sList l = createList(double, cmpDouble);
  * */
 #define createList(type, cmp) allocList(sizeof(type), cmp)
 
+/**
+ * Função privada
+ * */
 sList allocList(long size, int (*cmp)(const void *, const void *));
 
-/* Insere um elemento no fim da lista
- * Deve ser passado como primeiro argumento o endereço da lista usada, e segundo argumento o endereço do elemento que será guardado
- * Não tem retorno
- * Ex:	pushBackList(&l, &e);
+/**
+ * Insere um elemento no fim da lista
+ * 
+ * l : a lista usada
+ * e : o elemento que será inserido
+ * retorno : retorna 1 se o elemento foi inserido com sucesso, e 0 se não
+ * 			 possível inserir
+ * 
+ * Ex:	pushBackList(l, &e);
  * */
 int pushBackList(sList l, void *e);
 

@@ -112,7 +112,7 @@ void* frontList(sList l) {
 }
 
 void* searchlist(sList l, void *key, sIterator i) {
-	if (!l || !key)
+	if (!l || !key || !l->cmp)
 		return NULL;
 	sIterator it;
 	void *r;
