@@ -96,12 +96,13 @@ int popFrontList(sList l, void *e) {
 	l->sentinela->prox = no->prox;
 	l->sentinela->ant->prox = no->prox;
 	l->sentinela->prox->ant = no->ant;
-	//se e existe aponta ele para o elemento a ser removido
+	/*//se e existe aponta ele para o elemento a ser removido
 	if (e)
 		e = no->elem;
 	else//caso contrário, libera o elemento
-		free(no->elem);
+		free(no->elem);*/
 	//libera o node e atualiza a qtd de nós da lista
+	free(no->elem);
 	free(no);
 	l->qtd--;
 	return 0;
@@ -119,7 +120,7 @@ void* frontList(sList l) {
 	return l->sentinela->prox->elem;
 }
 
-void* searchlist(sList l, void *key, sIter i) {
+void* searchList(sList l, void *key, sIter i) {
 	//se !l, !key ou !cmp
 	if (!l || !key || !l->cmp)
 		return NULL;
@@ -231,8 +232,10 @@ void nextIt(sIter i) {
 		i->node = i->node->prox->prox;
 		i->loop = 1;
 	}
-	else
+	else {
 		i->node = i->node->prox;
+	}
+
 }
 
 int pushBeforeIt(sIter i, void *e) {
@@ -299,10 +302,7 @@ int popIt(sIter i, void *e) {
 	else
 		nextIt(i);
 
-	if (e)
-		e = no->elem;
-	else
-		free(no->elem);
+	free(no->elem);
 	free(no);
 	i->lista->qtd--;
 
@@ -313,26 +313,30 @@ int popBeforeIt(sIter i, void *e) {
 	if (!i || emptyList(i->lista))
 		return 1;
 
-	sNode *no;
+	sIter it = i;
+	beforeIt(it);
+	popIt(it, NULL);
+
+	/*sNode *no;
 	if (sizeList(i->lista) == 1) {
 		popIt(i, NULL);
 	}
 	else if (i->node->ant == i->lista->sentinela) {
-		no = i->node->ant->ant;
-		i->node->ant->ant->ant->prox = i->node->ant;
-		i->node->ant->ant = i->node->ant->ant->ant;
+		no = i->lista->sentinela->ant;
+		no->ant->prox = i->lista->sentinela;
+		i->lista->sentinela->ant = no->ant;
 	}
 	else {
 		no = i->node->ant;
-		i->node->ant->ant->prox = i->node;
-		i->node->ant = i->node->ant->ant;
+		no->ant->prox = i->node;
+		i->node->ant = no->ant;
 	}
-	if (e)
-		e = no->elem;
-	else
+
+	if (no->elem) {
 		free(no->elem);
-	free(no);
-	i->lista->qtd--;
+		free(no);
+	}
+	i->lista->qtd--;*/
 
 	return 0;
 }
@@ -355,10 +359,11 @@ int popNextIt(sIter i, void *e) {
 		i->node->prox->prox->ant = i->node;
 		i->node->prox = i->node->prox->prox;
 	}
-	if (e)
+	/*if (e)
 		e = no->elem;
 	else
-		free(no->elem);
+		free(no->elem);*/
+	free(no->elem);
 	free(no);
 	i->lista->qtd--;
 
@@ -377,7 +382,7 @@ int endLoop(sIter i) {
 	if (!i)
 		return 1;
 	//se a lista está vazia ou se o nextIt levou do fim da lista até o início
-	else if (emptyList(i->lista) || i->loop) {
+	if (emptyList(i->lista) || i->loop) {
 		i->loop = 0;
 		return 1;
 	}
