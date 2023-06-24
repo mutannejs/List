@@ -65,7 +65,7 @@ int pushFrontList(sList l, void *e) {
 	return 0;
 }
 
-int popBackList(sList l, void *e) {
+int popBackList(sList l) {
 	//se !l ou se a lista estiver vazia
 	if (!l || emptyList(l))
 		return 1;
@@ -75,18 +75,14 @@ int popBackList(sList l, void *e) {
 	l->sentinela->ant = no->ant;
 	l->sentinela->ant->prox = no->prox;
 	l->sentinela->prox->ant = no->ant;
-	//se e existe aponta ele para o elemento a ser removido
-	if (e)
-		e = no->elem;
-	else//caso contrário, libera o elemento
-		free(no->elem);
 	//libera o node e atualiza a qtd de nós da lista
+	free(no->elem);
 	free(no);
 	l->qtd--;
 	return 0;
 }
 
-int popFrontList(sList l, void *e) {
+int popFrontList(sList l) {
 	//se !l ou se a lista estiver vazia
 	if (!l || emptyList(l))
 		return 1;
@@ -96,11 +92,6 @@ int popFrontList(sList l, void *e) {
 	l->sentinela->prox = no->prox;
 	l->sentinela->ant->prox = no->prox;
 	l->sentinela->prox->ant = no->ant;
-	/*//se e existe aponta ele para o elemento a ser removido
-	if (e)
-		e = no->elem;
-	else//caso contrário, libera o elemento
-		free(no->elem);*/
 	//libera o node e atualiza a qtd de nós da lista
 	free(no->elem);
 	free(no);
@@ -164,7 +155,7 @@ void freeList(sList l) {
 	if (!l)
 		return;
 	//se a lista não estiver vazia, popBackList retornará 0
-	while (!popBackList(l, NULL));
+	while (!popBackList(l));
 	//libera o sentinela e a própria lista
 	free(l->sentinela);
 	free(l);
@@ -290,7 +281,8 @@ int pushNextIt(sIter i, void *e) {
 	return 0;
 }
 
-int popIt(sIter i, void *e) {
+int popIt(sIter i) {
+//printf("removido: %.2lf\n", *((double*)returnIt(i)));
 	if (!i || emptyList(i->lista))
 		return 1;
 
@@ -309,63 +301,24 @@ int popIt(sIter i, void *e) {
 	return 0;
 }
 
-int popBeforeIt(sIter i, void *e) {
+int popBeforeIt(sIter i) {
 	if (!i || emptyList(i->lista))
 		return 1;
 
-	sIter it = i;
+	sIter it = copyIt(i);
 	beforeIt(it);
-	popIt(it, NULL);
-
-	/*sNode *no;
-	if (sizeList(i->lista) == 1) {
-		popIt(i, NULL);
-	}
-	else if (i->node->ant == i->lista->sentinela) {
-		no = i->lista->sentinela->ant;
-		no->ant->prox = i->lista->sentinela;
-		i->lista->sentinela->ant = no->ant;
-	}
-	else {
-		no = i->node->ant;
-		no->ant->prox = i->node;
-		i->node->ant = no->ant;
-	}
-
-	if (no->elem) {
-		free(no->elem);
-		free(no);
-	}
-	i->lista->qtd--;*/
+	popIt(it);
 
 	return 0;
 }
 
-int popNextIt(sIter i, void *e) {
+int popNextIt(sIter i) {
 	if (!i || emptyList(i->lista))
 		return 1;
 
-	sNode *no;
-	if (sizeList(i->lista) == 1) {
-		popIt(i, NULL);
-	}
-	else if (i->node->prox == i->lista->sentinela) {
-		no = i->node->prox->prox;
-		i->node->prox->prox->prox->ant = i->node->prox;
-		i->node->prox->prox = i->node->prox->prox->prox;
-	}
-	else {
-		no = i->node->prox;
-		i->node->prox->prox->ant = i->node;
-		i->node->prox = i->node->prox->prox;
-	}
-	/*if (e)
-		e = no->elem;
-	else
-		free(no->elem);*/
-	free(no->elem);
-	free(no);
-	i->lista->qtd--;
+	sIter it = copyIt(i);
+	nextIt(it);
+	
 
 	return 0;
 }
@@ -375,6 +328,12 @@ void* returnIt(sIter i) {
 		return NULL;
 	else
 		return i->node->elem;
+}
+
+sIter copyIt(sIter i) {
+	sIter j = createIt(i->lista);
+	j->node = i->node;
+	return j;
 }
 
 int endLoop(sIter i) {

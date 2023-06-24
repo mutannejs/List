@@ -75,14 +75,14 @@ int pushFrontList(sList l, void *e);
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	popBackList(&l);
  * */
-int popBackList(sList l, void *e);
+int popBackList(sList l);
 
 /* Remove o elemento no início da lista
  * Deve ser passado como argumento o endereço da lista usada
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	popFrontList(&l);
  * */
-int popFrontList(sList l, void *e);
+int popFrontList(sList l);
 
 /* Retorna um ponteiro para o fim da lista
  * Deve ser passado como argumento o endereço da lista usada
@@ -183,21 +183,21 @@ int pushNextIt(sIter i, void *e);
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	removeIt(&i, &e);
  * */
-int popIt(sIter i, void *e);
+int popIt(sIter i);
 
 /* Remove o elemento que está na lista antes da posição atual do iterador
  * Deve ser passado como argumento o endereço do iterador usado
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	removeAntIt(&i, &e);
  * */
-int popBeforeIt(sIter i, void *e);
+int popBeforeIt(sIter i);
 
 /* Remove o elemento que está na lista depois da posição atual do iterador
  * Deve ser passado como argumento o endereço do iterador usado
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	removeProxIt(&i, &e);
  * */
-int popNextIt(sIter i, void *e);
+int popNextIt(sIter i);
 
 /* Retorna um ponteiro para o elemento referenciado pelo iterador
  * Deve ser passado como argumento o endereço do iterador usado
@@ -219,6 +219,10 @@ int beginIt(sIter *i);
  * Ex:	if (fimIt(&i)) {}
  * */
 int endIt(sIter *i);
+
+/* Cria uma cópia do iterador
+ * */
+sIter copyIt(sIter i);
 
 /* Verifica se foi feito um loop completo (de Front até Back)
  * */
