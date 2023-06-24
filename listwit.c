@@ -3,9 +3,9 @@
  * 
  * */
  
-#include "list.h"
+#include "listwit.h"
 
-sList allocList(long size, int (*cmp)(const void *, const void *)) {
+sList __alocaLista(long size, int (*cmp)(const void *, const void *)) {
 	//aloca a lista
 	sList l = malloc(sizeof(struct sLista));
 	if (!l)
@@ -15,7 +15,7 @@ sList allocList(long size, int (*cmp)(const void *, const void *)) {
 		return NULL;
 	//seta valores da lista
 	l->qtd = 0;
-	l->size = size;
+	l->tam = size;
 	l->cmp = cmp;
 	//encadeia o sentinela
 	l->sentinela->ant = l->sentinela->prox = l->sentinela;
@@ -30,11 +30,11 @@ int pushBackList(sList l, void *e) {
 	sNode *no = (sNode*) malloc(sizeof(sNode));
 	if (!no)
 		return 1;
-	no->elem = malloc(l->size);
+	no->elem = malloc(l->tam);
 	if (!no->elem)
 		return 1;
 	//seta os valores do node
-	memcpy(no->elem, e, l->size);
+	memcpy(no->elem, e, l->tam);
 	no->ant = l->sentinela->ant;
 	no->prox = l->sentinela;
 	//atualiza a lista
@@ -51,11 +51,11 @@ int pushFrontList(sList l, void *e) {
 	sNode *no = (sNode*) malloc(sizeof(sNode));
 	if (!no)
 		return 1;
-	no->elem = malloc(l->size);
+	no->elem = malloc(l->tam);
 	if (!no->elem)
 		return 1;
 	//seta os valores do node
-	memcpy(no->elem, e, l->size);
+	memcpy(no->elem, e, l->tam);
 	no->ant = l->sentinela;
 	no->prox = l->sentinela->prox;
 	//atualiza a lista
@@ -65,7 +65,7 @@ int pushFrontList(sList l, void *e) {
 	return 0;
 }
 
-int popBackList(sList l) {
+int popBackList(sList l, void *e) {
 	//se !l ou se a lista estiver vazia
 	if (!l || emptyList(l))
 		return 1;
@@ -75,14 +75,18 @@ int popBackList(sList l) {
 	l->sentinela->ant = no->ant;
 	l->sentinela->ant->prox = no->prox;
 	l->sentinela->prox->ant = no->ant;
+	//se e existe aponta ele para o elemento a ser removido
+	if (e)
+		e = no->elem;
+	else//caso contrário, libera o elemento
+		free(no->elem);
 	//libera o node e atualiza a qtd de nós da lista
-	free(no->elem);
 	free(no);
 	l->qtd--;
 	return 0;
 }
 
-int popFrontList(sList l) {
+int popFrontList(sList l, void *e) {
 	//se !l ou se a lista estiver vazia
 	if (!l || emptyList(l))
 		return 1;
@@ -92,8 +96,12 @@ int popFrontList(sList l) {
 	l->sentinela->prox = no->prox;
 	l->sentinela->ant->prox = no->prox;
 	l->sentinela->prox->ant = no->ant;
+	//se e existe aponta ele para o elemento a ser removido
+	if (e)
+		e = no->elem;
+	else//caso contrário, libera o elemento
+		free(no->elem);
 	//libera o node e atualiza a qtd de nós da lista
-	free(no->elem);
 	free(no);
 	l->qtd--;
 	return 0;
@@ -111,23 +119,23 @@ void* frontList(sList l) {
 	return l->sentinela->prox->elem;
 }
 
-void* searchlist(sList l, void *key, sIterator i) {
+void* searchlist(sList l, void *key, sIter i) {
+	//se !l, !key ou !cmp
 	if (!l || !key || !l->cmp)
 		return NULL;
-	sIterator it;
+	sIter it;
 	void *r;
 	//percorre toda a lista
 	for (it = createIt(l); !endLoop(it); nextIt(it)) {
 		//se encontrou o node com a chave passada
 		if (!l->cmp(key, returnIt(it))) {
 			//se i existe aponta ele para o node com a chave passada
-			if (i) {
+			if (i)
 				i->node = it->node;
-				i->inicioLoop = NULL;
-			}
 			//libera o iterador criado no inicio do loop
 			r = returnIt(it);
 			freeIt(it);
+			//retorna o elemento pesquisado
 			return r;
 		}
 	}
@@ -155,7 +163,7 @@ void freeList(sList l) {
 	if (!l)
 		return;
 	//se a lista não estiver vazia, popBackList retornará 0
-	while (!popBackList(l));
+	while (!popBackList(l, NULL));
 	//libera o sentinela e a própria lista
 	free(l->sentinela);
 	free(l);
@@ -167,49 +175,42 @@ void freeList(sList l) {
  * 
  * */
 
-sIterator createIt(sList l) {
+sIter createIt(sList l) {
 	if (!l)
 		return NULL;
 	//aloca o iterador
-	sIterator i = malloc(sizeof(struct sIterador));
+	sIter i = malloc(sizeof(struct sIterador));
 	if (!i)
 		return NULL;
-	//seta os valores do iterador
 	//aponta o iterador para o primeiro node da lista (se ele existir)
 	if (emptyList(l))
 		i->node = NULL;
 	else
 		i->node = l->sentinela->prox;
 	i->lista = l;
-	//inicia o loop
-	i->inicioLoop = NULL;
-	startLoop(i);
+	i->loop = 0;
 	return i;
 }
 
-void frontIt(sIterator i) {
+void frontIt(sIter i) {
 	if (!i)
 		return;
 	if (emptyList(i->lista))
 		i->node = NULL;
 	else
 		i->node = i->lista->sentinela->prox;
-	//inicia o loop
-	startLoop(i);
 }
 
-void backIt(sIterator i) {
+void backIt(sIter i) {
 	if (!i)
 		return;
 	if (emptyList(i->lista))
 		i->node = NULL;
 	else
 		i->node = i->lista->sentinela->ant;
-	//inicia o loop
-	startLoop(i);
 }
 
-void beforeIt(sIterator i) {
+void beforeIt(sIter i) {
 	if (!i)
 		return;
 	if (emptyList(i->lista))
@@ -218,22 +219,23 @@ void beforeIt(sIterator i) {
 		i->node = i->node->ant->ant;
 	else
 		i->node = i->node->ant;
-	i->vistosLoop -= 1;
 }
 
-void nextIt(sIterator i) {
+void nextIt(sIter i) {
 	if (!i)
 		return;
+	i->loop = 0;
 	if (emptyList(i->lista))
 		i->node = NULL;
-	else if (i->node->prox == i->lista->sentinela)//pula o sentila
+	else if (i->node->prox == i->lista->sentinela) {//pula o sentila
 		i->node = i->node->prox->prox;
+		i->loop = 1;
+	}
 	else
 		i->node = i->node->prox;
-	i->vistosLoop += 1;
 }
 
-int pushBeforeIt(sIterator i, void *e) {
+int pushBeforeIt(sIter i, void *e) {
 	if (!i)
 		return 1;
 	
@@ -241,10 +243,10 @@ int pushBeforeIt(sIterator i, void *e) {
 		sNode *no = (sNode*) malloc(sizeof(sNode));
 		if (!no)
 			return 1;
-		no->elem = malloc(i->lista->size);
+		no->elem = malloc(i->lista->tam);
 		if (!no->elem)
 			return 1;
-		memcpy(no->elem, e, i->lista->size);
+		memcpy(no->elem, e, i->lista->tam);
 		no->ant = i->node->ant;
 		no->prox = i->node;
 		i->node->ant->prox = no;
@@ -255,14 +257,11 @@ int pushBeforeIt(sIterator i, void *e) {
 		pushFrontList(i->lista, e);
 		frontIt(i);
 	}
-	
-	if (i->vistosLoop > 0)
-		i->vistosLoop += 1;
 
 	return 0;
 }
 
-int pushNextIt(sIterator i, void *e) {
+int pushNextIt(sIter i, void *e) {
 	if (!i)
 		return 1;
 
@@ -270,10 +269,10 @@ int pushNextIt(sIterator i, void *e) {
 		sNode *no = (sNode*) malloc(sizeof(sNode));
 		if (!no)
 			return 1;
-		no->elem = malloc(i->lista->size);
+		no->elem = malloc(i->lista->tam);
 		if (!no->elem)
 			return 1;
-		memcpy(no->elem, e, i->lista->size);
+		memcpy(no->elem, e, i->lista->tam);
 		no->ant = i->node;
 		no->prox = i->node->prox;
 		i->node->prox->ant = no;
@@ -284,14 +283,11 @@ int pushNextIt(sIterator i, void *e) {
 		pushFrontList(i->lista, e);
 		frontIt(i);
 	}
-	
-	if (i->vistosLoop < 0)
-		i->vistosLoop -= 1;
 
 	return 0;
 }
 
-int popIt(sIterator i) {
+int popIt(sIter i, void *e) {
 	if (!i || emptyList(i->lista))
 		return 1;
 
@@ -302,25 +298,24 @@ int popIt(sIterator i) {
 		i->node = NULL;
 	else
 		nextIt(i);
-	free(no->elem);
+
+	if (e)
+		e = no->elem;
+	else
+		free(no->elem);
 	free(no);
 	i->lista->qtd--;
-	if (i->lista->qtd == 0)
-		i->node = NULL;
-
-	if (i->vistosLoop < 0)
-		i->vistosLoop += 1;
 
 	return 0;
 }
 
-int popBeforeIt(sIterator i) {
+int popBeforeIt(sIter i, void *e) {
 	if (!i || emptyList(i->lista))
 		return 1;
 
 	sNode *no;
 	if (sizeList(i->lista) == 1) {
-		popIt(i);
+		popIt(i, NULL);
 	}
 	else if (i->node->ant == i->lista->sentinela) {
 		no = i->node->ant->ant;
@@ -332,25 +327,23 @@ int popBeforeIt(sIterator i) {
 		i->node->ant->ant->prox = i->node;
 		i->node->ant = i->node->ant->ant;
 	}
-	free(no->elem);
+	if (e)
+		e = no->elem;
+	else
+		free(no->elem);
 	free(no);
 	i->lista->qtd--;
-	if (i->lista->qtd == 0)
-		i->node = NULL;
-
-	if (i->vistosLoop > 0)
-		i->vistosLoop -= 1;
 
 	return 0;
 }
 
-int popNextIt(sIterator i) {
+int popNextIt(sIter i, void *e) {
 	if (!i || emptyList(i->lista))
 		return 1;
 
 	sNode *no;
 	if (sizeList(i->lista) == 1) {
-		popIt(i);
+		popIt(i, NULL);
 	}
 	else if (i->node->prox == i->lista->sentinela) {
 		no = i->node->prox->prox;
@@ -362,136 +355,30 @@ int popNextIt(sIterator i) {
 		i->node->prox->prox->ant = i->node;
 		i->node->prox = i->node->prox->prox;
 	}
-	free(no->elem);
+	if (e)
+		e = no->elem;
+	else
+		free(no->elem);
 	free(no);
 	i->lista->qtd--;
-	if (i->lista->qtd == 0)
-		i->node = NULL;
-
-	if (i->vistosLoop < 0)
-		i->vistosLoop += 1;
 
 	return 0;
 }
 
-int pushBackIt(sIterator i, void *e) {
-	if (!i || !e)
-		return 1;
-
-	//aloca um node
-	sNode *no = (sNode*) malloc(sizeof(sNode));
-	if (!no)
-		return 1;
-	no->elem = malloc(i->lista->size);
-	if (!no->elem)
-		return 1;
-
-	//seta os valores do node
-	memcpy(no->elem, e, i->lista->size);
-	no->ant = i->lista->sentinela->ant;
-	no->prox = i->lista->sentinela;
-
-	//atualiza a lista
-	i->lista->sentinela->ant->prox = no;
-	i->lista->sentinela->ant = no;
-	i->lista->qtd++;
-
-	//atualiza os valores do loop
-	if (i->inicioLoop && i->vistosLoop > 0) {
-		sIterator it = createIt(i->lista);
-		backIt(it);
-		for (long j = i->vistosLoop; j > 0; j--, beforeIt(it)) {
-			if (it->node == i->inicioLoop) {
-				i->vistosLoop += 1;
-				j = 0;
-			}
-		}
-		freeIt(it);
-	}
-	else if (i->inicioLoop && i->vistosLoop < 0) {
-		sIterator it = createIt(i->lista);
-		backIt(it);
-		for (long j = i->vistosLoop; j < 0; j++, nextIt(it)) {
-			if (it->node == i->inicioLoop) {
-				i->vistosLoop -= 1;
-				j = 0;
-			}
-		}
-		freeIt(it);
-	}
-
-	return 0;
-}
-
-int pushFrontIt(sIterator i, void *e) {
-	if (!i || !e)
-		return 1;
-
-	//aloca um node
-	sNode *no = (sNode*) malloc(sizeof(sNode));
-	if (!no)
-		return 1;
-	no->elem = malloc(i->lista->size);
-	if (!no->elem)
-		return 1;
-
-	//seta os valores do node
-	memcpy(no->elem, e, i->lista->size);
-	no->ant = i->lista->sentinela;
-	no->prox = i->lista->sentinela->prox;
-
-	//atualiza a lista
-	i->lista->sentinela->prox->ant = no;
-	i->lista->sentinela->prox = no;
-	i->lista->qtd++;
-
-	//atualiza os valores do loop
-	if (i->inicioLoop && i->vistosLoop > 0) {
-		sIterator it = createIt(i->lista);
-		for (long j = i->vistosLoop; j > 0; j--, beforeIt(it)) {
-			if (it->node == i->inicioLoop) {
-				i->vistosLoop += 1;
-				j = 0;
-			}
-		}
-		freeIt(it);
-	}
-	else if (i->inicioLoop && i->vistosLoop < 0) {
-		sIterator it = createIt(i->lista);
-		for (long j = i->vistosLoop; j < 0; j++, nextIt(it)) {
-			if (it->node == i->inicioLoop) {
-				i->vistosLoop -= 1;
-				j = 0;
-			}
-		}
-		freeIt(it);
-	}
-
-	return 0;
-}
-
-void* returnIt(sIterator i) {
+void* returnIt(sIter i) {
 	if (!i)
 		return NULL;
 	else
 		return i->node->elem;
 }
 
-void startLoop(sIterator i) {
-	if (!i || emptyList(i->lista))
-		return;
-	i->inicioLoop = i->node;
-	i->vistosLoop = 0;
-}
-
-int endLoop(sIterator i) {
+int endLoop(sIter i) {
 	//se !i retorna fim de loop
 	if (!i)
 		return 1;
-	//se a lista está vazia ou foi percorrido toda a lista desde startLoop,
-	//seta i->inicio como NULL e retorna fim de loop
-	else if (emptyList(i->lista) || (i->node == i->inicioLoop && i->vistosLoop != 0)) {
-		i->inicioLoop = NULL;
+	//se a lista está vazia ou se o nextIt levou do fim da lista até o início
+	else if (emptyList(i->lista) || i->loop) {
+		i->loop = 0;
 		return 1;
 	}
 	else {
@@ -499,7 +386,7 @@ int endLoop(sIterator i) {
 	}
 }
 
-void freeIt(sIterator i) {
+void freeIt(sIter i) {
 	if (i)
 		free(i);
 }

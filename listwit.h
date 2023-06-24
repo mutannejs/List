@@ -3,31 +3,30 @@
  * 
  * */
 
-#ifndef LIST_H
-#define LIST_H
+#ifndef LISTWIT_H
+#define LISTWIT_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct sNode {
+typedef struct sNo {
 	void *elem;
-	struct sNode *ant, *prox;
+	struct sNo *ant, *prox;
 } sNode;
 
 typedef struct sLista {
 	long qtd;
-	size_t size;
-	struct sNode *sentinela;
+	size_t tam;
+	struct sNo *sentinela;
 	int (*cmp)(const void *key, const void *elem);
 } *sList;
 
 typedef struct sIterador {
-	struct sNode *node;
+	struct sNo *node;
 	struct sLista *lista;
-	struct sNode *inicioLoop;
-	long vistosLoop;
-} *sIterator;
+	int loop;
+} *sIter;
 
 /**
  * Cria uma lista
@@ -45,18 +44,18 @@ typedef struct sIterador {
  * 	função de comparação chamada cmpDouble:
  * sList l = createList(double, cmpDouble);
  * */
-#define createList(type, cmp) allocList(sizeof(type), cmp)
+#define createList(type, cmp) __alocaLista(sizeof(type), cmp)
 
 /**
- * Função privada
+ * Função privada para alocar uma lista. Baixo nível para createList()
  * */
-sList allocList(long size, int (*cmp)(const void *, const void *));
+sList __alocaLista(long tam, int (*cmp)(const void *, const void *));
 
 /**
  * Insere um elemento no fim da lista
  * 
- * l : a lista usada
- * e : o elemento que será inserido
+ * l  : a lista usada
+ * *e : ponteiro para o elemento que será inserido
  * retorno : retorna 1 se o elemento foi inserido com sucesso, e 0 se não
  * 			 possível inserir
  * 
@@ -76,14 +75,14 @@ int pushFrontList(sList l, void *e);
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	popBackList(&l);
  * */
-int popBackList(sList l);
+int popBackList(sList l, void *e);
 
 /* Remove o elemento no início da lista
  * Deve ser passado como argumento o endereço da lista usada
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	popFrontList(&l);
  * */
-int popFrontList(sList l);
+int popFrontList(sList l, void *e);
 
 /* Retorna um ponteiro para o fim da lista
  * Deve ser passado como argumento o endereço da lista usada
@@ -99,7 +98,9 @@ void* backList(sList l);
  * */
 void* frontList(sList l);
 
-void* searchlist(sList l, void *key, sIterator i);
+/* Retorna elemento com a chave informada
+ * */
+void* searchList(sList l, void *key, sIter i);
 
 /* Informa se a lista está vazia
  * Deve ser passado como argumento o endereço da lista usada
@@ -133,89 +134,108 @@ void freeList(sList l);
  * Retorna um iterador para a lista, se referindo para o início dela
  * Ex:	sIterador i = criaIt(&l);
  * */
-sIterator createIt(sList l);
+sIter createIt(sList l);
 
 /* Itera para o primeiro elemento na lista
  * Deve ser passado como argumento o endereço do iterador usado
  * Não tem retorno
  * Ex:	iteraInicio(&i);
  * */
-void frontIt(sIterator i);
+void frontIt(sIter i);
 
 /* Itera para o último elemento na lista
  * Deve ser passado como argumento o endereço do iterador usado
  * Não tem retorno
  * Ex:	iteraFim(&i);
  * */
-void backIt(sIterator i);
+void backIt(sIter i);
 
 /* Itera para o elemento anterior na lista
  * Deve ser passado como argumento o endereço do iterador usado
  * Não tem retorno
  * Ex:	iteraAnterior(&i);
  * */
-void beforeIt(sIterator i);
+void beforeIt(sIter i);
 
 /* Itera para o próximo elemento na lista
  * Deve ser passado como argumento o endereço do iterador usado
  * Não tem retorno
  * Ex:	iteraProximo(&i);
  * */
-void nextIt(sIterator i);
+void nextIt(sIter i);
 
 /* Insere um elemento na lista antes da posição atual do iterador
  * Deve ser passado como primeiro argumento o endereço do iterador usado, e segundo argumento o endereço do elemento que será guardado
  * Não tem retorno
  * Ex:	insereAntIt(&i, &e);
  * */
-int pushBeforeIt(sIterator i, void *e);
+int pushBeforeIt(sIter i, void *e);
 
 /* Insere um elemento na lista depois da posição atual do iterador
  * Deve ser passado como primeiro argumento o endereço do iterador usado, e segundo argumento o endereço do elemento que será guardado
  * Não tem retorno
  * Ex:	insereProxIt(&i, &e);
  * */
-int pushNextIt(sIterator i, void *e);
-
-int pushBackIt(sIterator i, void *e);
-
-int pushFrontIt(sIterator i, void *e);
+int pushNextIt(sIter i, void *e);
 
 /* Remove o elemento da lista que está sendo referenciado pelo iterador
  * Deve ser passado como argumento o endereço do iterador usado (o iterador passa a apontar para o elemento seguinte)
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	removeIt(&i, &e);
  * */
-int popIt(sIterator i);
+int popIt(sIter i, void *e);
 
 /* Remove o elemento que está na lista antes da posição atual do iterador
  * Deve ser passado como argumento o endereço do iterador usado
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	removeAntIt(&i, &e);
  * */
-int popBeforeIt(sIterator i);
+int popBeforeIt(sIter i, void *e);
 
 /* Remove o elemento que está na lista depois da posição atual do iterador
  * Deve ser passado como argumento o endereço do iterador usado
  * Retorna 1 caso tenha sido removido o elemento, e 0 caso a lista esteja vazia
  * Ex:	removeProxIt(&i, &e);
  * */
-int popNextIt(sIterator i);
+int popNextIt(sIter i, void *e);
 
 /* Retorna um ponteiro para o elemento referenciado pelo iterador
  * Deve ser passado como argumento o endereço do iterador usado
  * Retorna um ponteiro para o conteúdo na lista referenciado pelo iterador (deve ser usado type casting), caso a lista esteja vazia retorna NULL
  * Ex:	double *d = (double*) retornaItera(&i);
  * */
-void* returnIt(sIterator i);
+void* returnIt(sIter i);
 
-void startLoop(sIterator i);
+/* Informa se o iterador está referenciando para o início da lista
+ * Deve ser passado como argumento o endereço do iterador usado
+ * Retorna 1 caso o iterador esteja referenciando para o início da lista, e 0 caso não esteja
+ * Ex:	if (inicioIt(&i)) {}
+ * */
+int beginIt(sIter *i);
 
-int endLoop(sIterator i);
+/* Informa se o iterador está referenciando para o fim da lista
+ * Deve ser passado como argumento o endereço do iterador usado
+ * Retorna 1 caso o iterador esteja referenciando para o fim da lista, e 0 caso não esteja
+ * Ex:	if (fimIt(&i)) {}
+ * */
+int endIt(sIter *i);
 
-void freeIt(sIterator i);
+/* Verifica se foi feito um loop completo (de Front até Back)
+ * */
+int endLoop(sIter i);
+
+/* Libera espço alocado pelo iterador
+ * */
+void freeIt(sIter i);
 
 #if 0
+
+	int pushBackIt(sIterator i, void *e);
+
+	int pushFrontIt(sIterator i, void *e);
+
+	void startLoop(sIterator i);
+
 	/* Informa se o iterador está referenciando para o início da lista
 	 * Deve ser passado como argumento o endereço do iterador usado
 	 * Retorna 1 caso o iterador esteja referenciando para o início da lista, e 0 caso não esteja
