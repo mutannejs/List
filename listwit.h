@@ -244,37 +244,4 @@ int endLoop(sIter i);
  * */
 void freeIt(sIter i);
 
-#if 0
-
-	int pushBackIt(sIterator i, void *e);
-
-	int pushFrontIt(sIterator i, void *e);
-
-	void startLoop(sIterator i);
-
-	/* Informa se o iterador está referenciando para o início da lista
-	 * Deve ser passado como argumento o endereço do iterador usado
-	 * Retorna 1 caso o iterador esteja referenciando para o início da lista, e 0 caso não esteja
-	 * Ex:	if (inicioIt(&i)) {}
-	 * */
-	int inicioIt(sIterator *i);
-
-	/* Informa se o iterador está referenciando para o fim da lista
-	 * Deve ser passado como argumento o endereço do iterador usado
-	 * Retorna 1 caso o iterador esteja referenciando para o fim da lista, e 0 caso não esteja
-	 * Ex:	if (fimIt(&i)) {}
-	 * */
-	int fimIt(sIterator *i);
-
-	// Exemplo de loop usando iterador, do início ao fim da lista
-	/* 
-	 * sIterador it = criaIt(&l);
-	 * do {
-	 * 	//processo
-	 * 	iteraProximo(&it);
-	 * } while (inicioIt(&it));
-	 * 
-	 * */
-#endif
-
 #endif
