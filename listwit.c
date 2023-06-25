@@ -99,41 +99,60 @@ int popFrontList(sList l) {
 	return 0;
 }
 
-void* backList(sList l) {
-	if (!l || emptyList(l))
-		return NULL;
-	return l->sentinela->ant->elem;
+int backList(sList l, void *p) {
+	if (!l || !p || emptyList(l))
+		return 1;
+	memcpy(p, l->sentinela->ant->elem, l->tam);
+	return 0;
 }
 
-void* frontList(sList l) {
-	if (!l || emptyList(l))
-		return NULL;
-	return l->sentinela->prox->elem;
+int frontList(sList l, void *p) {
+	if (!l || !p || emptyList(l))
+		return 1;
+	memcpy(p, l->sentinela->prox->elem, l->tam);
+	return 0;
 }
 
-void* searchList(sList l, void *key, sIter i) {
+/* Atualiza o valor do elemento no fim da lista
+ * */
+int setBackList(sList l, void *e) {
+	if (!l || emptyList(l))
+		return 1;
+	memcpy(l->sentinela->ant->elem, e, l->tam);
+	return 0;
+}
+
+/* Atualiza o valor do elemento no início da lista
+ * */
+int setFrontList(sList l, void *e) {
+	if (!l || emptyList(l))
+		return 1;
+	memcpy(l->sentinela->prox->elem, e, l->tam);
+	return 0;
+}
+
+int searchList(sList l, void *key, sIter i) {
 	//se !l, !key ou !cmp
 	if (!l || !key || !l->cmp)
-		return NULL;
+		return 0;
 	sIter it;
-	void *r;
+	void *retIt = malloc(l->tam);
 	//percorre toda a lista
 	for (it = createIt(l); !endLoop(it); nextIt(it)) {
 		//se encontrou o node com a chave passada
-		if (!l->cmp(key, returnIt(it))) {
+		returnIt(it, retIt);
+		if (!l->cmp(key, retIt)) {
 			//se i existe aponta ele para o node com a chave passada
 			if (i)
 				i->node = it->node;
 			//libera o iterador criado no inicio do loop
-			r = returnIt(it);
 			freeIt(it);
-			//retorna o elemento pesquisado
-			return r;
+			return 1;
 		}
 	}
 	//libera o iterador criado no inicio do loop
 	freeIt(it);
-	return NULL;
+	return 0;
 }
 
 int emptyList(sList l) {
@@ -191,6 +210,7 @@ void frontIt(sIter i) {
 		i->node = NULL;
 	else
 		i->node = i->lista->sentinela->prox;
+	i->loop = 0;
 }
 
 void backIt(sIter i) {
@@ -282,7 +302,6 @@ int pushNextIt(sIter i, void *e) {
 }
 
 int popIt(sIter i) {
-//printf("removido: %.2lf\n", *((double*)returnIt(i)));
 	if (!i || emptyList(i->lista))
 		return 1;
 
@@ -318,16 +337,37 @@ int popNextIt(sIter i) {
 
 	sIter it = copyIt(i);
 	nextIt(it);
-	
+	popIt(it);
 
 	return 0;
 }
 
-void* returnIt(sIter i) {
-	if (!i)
-		return NULL;
+int beginIt(sIter i) {
+	if (i->node == i->lista->sentinela->prox && !emptyList(i->lista))
+		return 1;
 	else
-		return i->node->elem;
+		return 0;
+}
+
+int endIt(sIter i) {
+	if (i->node == i->lista->sentinela->ant && !emptyList(i->lista))
+		return 1;
+	else
+		return 0;
+}
+
+int returnIt(sIter i, void *p) {
+	if (!i || !i->node || !p)
+		return 1;
+	memcpy(p, i->node->elem, i->lista->tam);
+	return 0;
+}
+
+int setIt(sIter i, void *e) {
+	if (!i || !i->node || !e)
+		return 1;
+	memcpy(i->node->elem, e, i->lista->tam);
+	return 0;
 }
 
 sIter copyIt(sIter i) {

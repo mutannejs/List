@@ -84,23 +84,31 @@ int popBackList(sList l);
  * */
 int popFrontList(sList l);
 
-/* Retorna um ponteiro para o fim da lista
+/* Retorna uma cópia do fim da lista
  * Deve ser passado como argumento o endereço da lista usada
  * Retorna um ponteiro para o conteúdo no fim da lista (deve ser usado type casting), caso a lista esteja vazia retorna NULL
  * Ex:	double *d = (double*) backList(&l);
  * */
-void* backList(sList l);
+int backList(sList l, void *p);
 
-/* Retorna um ponteiro para o início da lista
+/* Retorna uma cópia do início da lista
  * Deve ser passado como argumento o endereço da lista usada
  * Retorna um ponteiro para o conteúdo no início da lista (deve ser usado type casting), caso a lista esteja vazia retorna NULL
  * Ex:	double *d = (double*) frontList(&l);
  * */
-void* frontList(sList l);
+int frontList(sList l, void *p);
+
+/* Atualiza o valor do elemento no fim da lista
+ * */
+int setBackList(sList l, void *e);
+
+/* Atualiza o valor do elemento no início da lista
+ * */
+int setFrontList(sList l, void *e);
 
 /* Retorna elemento com a chave informada
  * */
-void* searchList(sList l, void *key, sIter i);
+int searchList(sList l, void *key, sIter i);
 
 /* Informa se a lista está vazia
  * Deve ser passado como argumento o endereço da lista usada
@@ -199,26 +207,30 @@ int popBeforeIt(sIter i);
  * */
 int popNextIt(sIter i);
 
-/* Retorna um ponteiro para o elemento referenciado pelo iterador
- * Deve ser passado como argumento o endereço do iterador usado
- * Retorna um ponteiro para o conteúdo na lista referenciado pelo iterador (deve ser usado type casting), caso a lista esteja vazia retorna NULL
- * Ex:	double *d = (double*) retornaItera(&i);
- * */
-void* returnIt(sIter i);
-
 /* Informa se o iterador está referenciando para o início da lista
  * Deve ser passado como argumento o endereço do iterador usado
  * Retorna 1 caso o iterador esteja referenciando para o início da lista, e 0 caso não esteja
  * Ex:	if (inicioIt(&i)) {}
  * */
-int beginIt(sIter *i);
+int beginIt(sIter i);
 
 /* Informa se o iterador está referenciando para o fim da lista
  * Deve ser passado como argumento o endereço do iterador usado
  * Retorna 1 caso o iterador esteja referenciando para o fim da lista, e 0 caso não esteja
  * Ex:	if (fimIt(&i)) {}
  * */
-int endIt(sIter *i);
+int endIt(sIter i);
+
+/* Retorna uma cópia do elemento referenciado pelo iterador
+ * Deve ser passado como argumento o endereço do iterador usado
+ * Retorna um ponteiro para o conteúdo na lista referenciado pelo iterador (deve ser usado type casting), caso a lista esteja vazia retorna NULL
+ * Ex:	double *d = (double*) retornaItera(&i);
+ * */
+int returnIt(sIter i, void *p);
+
+/* Atualiza o valor do elemento referenciado pelo iterador
+ * */
+int setIt(sIter i, void *e);
 
 /* Cria uma cópia do iterador
  * */
